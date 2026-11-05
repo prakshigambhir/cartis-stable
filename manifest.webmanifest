@@ -1,0 +1,25 @@
+{
+  "id": "./",
+  "name": "Cartis",
+  "short_name": "Cartis",
+  "description": "Your horses, care and stable in one place.",
+  "start_url": "./#overview",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#faf8f3",
+  "theme_color": "#6a4d37",
+  "icons": [
+    {
+      "src": "cartis-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "cartis-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

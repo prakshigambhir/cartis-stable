@@ -1,0 +1,14 @@
+{
+  "checkedOn":"2026-10-31",
+  "events":[
+    {"id":"wec-nov1","name":"WEC Ocala · November Series I","country":"United States","city":"Ocala","region":"Florida","type":"Show jumping","date":"2026-11-04","endDate":"2026-11-08","source":"World Equestrian Center","url":"https://worldequestriancenter.com/news/entries-stall-reservations-now-open-for-2026-november-december-show-series-at-world-equestrian-center-ocala/"},
+    {"id":"wec-nov2","name":"WEC Ocala · November Series II","country":"United States","city":"Ocala","region":"Florida","type":"Show jumping","date":"2026-11-11","endDate":"2026-11-15","source":"World Equestrian Center","url":"https://worldequestriancenter.com/news/entries-stall-reservations-now-open-for-2026-november-december-show-series-at-world-equestrian-center-ocala/"},
+    {"id":"wec-dec1","name":"WEC Ocala · December Series I","country":"United States","city":"Ocala","region":"Florida","type":"Show jumping","date":"2026-12-01","endDate":"2026-12-06","source":"World Equestrian Center","url":"https://worldequestriancenter.com/news/entries-stall-reservations-now-open-for-2026-november-december-show-series-at-world-equestrian-center-ocala/"},
+    {"id":"wec-dec2","name":"WEC Ocala · December Series II","country":"United States","city":"Ocala","region":"Florida","type":"Show jumping","date":"2026-12-08","endDate":"2026-12-13","source":"World Equestrian Center","url":"https://worldequestriancenter.com/news/entries-stall-reservations-now-open-for-2026-november-december-show-series-at-world-equestrian-center-ocala/"},
+    {"id":"keeneland-sale","name":"Keeneland November Breeding Stock Sale","country":"United States","city":"Lexington","region":"Kentucky","type":"Auction","date":"2026-11-03","endDate":"2026-11-11","source":"Keeneland","url":"https://www.keeneland.com/"},
+    {"id":"keeneland-racing-sale","name":"Keeneland November Horses of Racing Age Sale","country":"United States","city":"Lexington","region":"Kentucky","type":"Auction","date":"2026-11-12","endDate":"2026-11-12","source":"Keeneland","url":"https://www.keeneland.com/"},
+    {"id":"london-2026","name":"London International Horse Show","country":"United Kingdom","city":"London","region":"England","type":"Multi-discipline","date":"2026-12-17","endDate":"2026-12-21","source":"London International Horse Show","url":"https://londonhorseshow.com/"},
+    {"id":"lyon-2026","name":"Longines Equita Lyon","country":"France","city":"Lyon","region":"Auvergne-Rhône-Alpes","type":"Multi-discipline","date":"2026-10-28","endDate":"2026-11-01","source":"World Sport Timing","url":"https://results.worldsporttiming.com/2026/equita-lyon"},
+    {"id":"aachen-youngstars","name":"Aachen Youngstars · Jumping","country":"Germany","city":"Aachen","region":"North Rhine-Westphalia","type":"Show jumping","date":"2026-11-26","endDate":"2026-11-29","source":"World Sport Timing","url":"https://www.worldsporttiming.com/en/"}
+  ]
+}
