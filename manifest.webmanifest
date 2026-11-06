@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "Cartis",
-  "short_name": "Cartis",
+  "name": "Carrot",
+  "short_name": "Carrot",
   "description": "Your horses, care and stable in one place.",
   "start_url": "./#overview",
   "scope": "./",
