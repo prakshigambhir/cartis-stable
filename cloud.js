@@ -5,7 +5,7 @@ async function cloudClient(){
  if(!cloudConfigured())throw Error('Cloud storage has not been connected yet.');
  if(!cloudClientPromise)cloudClientPromise=(async()=>{
   if(!window.supabase)await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='supabase.js';script.onload=resolve;script.onerror=()=>reject(Error('Could not load cloud access.'));document.head.append(script)});
-  return window.supabase.createClient(CARTIS_CLOUD.url,CARTIS_CLOUD.publishableKey,{auth:{detectSessionInUrl:false,storageKey:'cartis-cloud-auth'}});
+  return window.supabase.createClient(CARTIS_CLOUD.url,CARTIS_CLOUD.publishableKey,{auth:{detectSessionInUrl:true,flowType:'pkce',storageKey:'cartis-cloud-auth'}});
  })().catch(error=>{cloudClientPromise=null;throw error});
  return cloudClientPromise;
 }
@@ -14,9 +14,8 @@ async function cloudPanel(){
  openModal('Cloud & devices',`<p class="subtitle">Save a private copy of this browser’s workspace, then load it on another device. Transfers are manual; local edits are not automatically synced.</p><div id="cloud-body" class="spaced"></div><p id="cloud-status" class="subtitle spaced" role="status"></p>`);
  if(!cloudConfigured()){$('#cloud-body').innerHTML='<div class="note">Supabase is prepared but not connected. No records have been uploaded. Connect the database project before using cloud storage.</div>';return}
  try{const client=await cloudClient();const {data,error}=await client.auth.getUser();
- if(error||!data.user){cloudOwner=null;cloudRevision=null;$('#cloud-body').innerHTML=`<form id="cloud-email-form" class="entry-form"><label class="field">Email address<input name="email" type="email" autocomplete="email" required></label><button class="btn primary">Send sign-in code</button></form><form id="cloud-code-form" class="entry-form" hidden><label class="field">Email code<input name="code" inputmode="numeric" autocomplete="one-time-code" required></label><button class="btn primary">Verify & sign in</button></form><p class="subtitle spaced">Cloud access uses a verified email code. The local demo profile does not grant access to cloud records.</p>`;
- let email='';$('#cloud-email-form').onsubmit=async event=>{event.preventDefault();if(cloudBusy)return;cloudBusy=true;const button=event.target.querySelector('button');button.disabled=true;email=new FormData(event.target).get('email').trim();try{const result=await client.auth.signInWithOtp({email});if(result.error)throw result.error;$('#cloud-code-form').hidden=false;cloudStatus('Check your email and enter the sign-in code.')}catch(error){cloudStatus(error.message)}finally{cloudBusy=false;button.disabled=false}};
- $('#cloud-code-form').onsubmit=async event=>{event.preventDefault();if(cloudBusy)return;cloudBusy=true;try{const result=await client.auth.verifyOtp({email,token:new FormData(event.target).get('code').trim(),type:'email'});if(result.error)throw result.error;cloudBusy=false;await cloudPanel()}catch(error){cloudStatus(error.message)}finally{cloudBusy=false}};return}
+ if(error||!data.user){cloudOwner=null;cloudRevision=null;$('#cloud-body').innerHTML=`<form id="cloud-email-form" class="entry-form"><label class="field">Email address<input name="email" type="email" autocomplete="email" required></label><button class="btn primary">Email sign-in link</button></form><p class="subtitle spaced">Open the link in this same browser and device. Cloud access requires verified email; your local demo profile does not grant access to cloud records.</p>`;
+ $('#cloud-email-form').onsubmit=async event=>{event.preventDefault();if(cloudBusy)return;cloudBusy=true;const button=event.target.querySelector('button');button.disabled=true;const email=new FormData(event.target).get('email').trim();try{const result=await client.auth.signInWithOtp({email,options:{emailRedirectTo:new URL('./',location.href).href}});if(result.error)throw result.error;cloudStatus('Check your email. Open the sign-in link in this browser, then return to Cloud & devices.')}catch(error){cloudStatus(error.message)}finally{cloudBusy=false;button.disabled=false}};return}
  if(cloudOwner?.id!==data.user.id)cloudRevision=null;cloudOwner=data.user;const {data:row,error:readError}=await client.from('cartis_workspaces').select('revision,updated_at').eq('user_id',cloudOwner.id).maybeSingle();if(readError)throw readError;
  // Reading metadata does not grant permission to replace an existing cloud workspace.
  if(!row)cloudRevision=0;
@@ -59,3 +58,5 @@ async function restoreCloudWorkspace(){
  }catch(error){cloudStatus(error.message||'The cloud copy could not load.')}finally{cloudBusy=false}
 }
 const cloudLink=document.createElement('button');cloudLink.textContent='Cloud & devices';cloudLink.className='phone-help';cloudLink.onclick=cloudPanel;document.querySelector('.account-links').append(cloudLink);
+
+if(new URLSearchParams(location.search).has('code')&&cloudConfigured())queueMicrotask(()=>cloudPanel());
