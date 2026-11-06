@@ -67,7 +67,9 @@ async function loadPublication(id,force=false){
   const audit=await client.from('carrot_publication_audit').select('action,revision,created_at').eq('listing_id',id).order('id',{ascending:false}).limit(12);
   if(audit.error)throw audit.error;
   if(epoch!==workspaceEpoch)return;
-  publicationStates.set(id,{...(result.data||{state:'draft',revision:0}),audit:audit.data||[]});
+  const probe=await fetch(CARTIS_CLOUD.url+'/functions/v1/listing-media?listing=00000000-0000-4000-8000-000000000000&asset=not-approved',{cache:'no-store'}).catch(()=>null);
+  if(epoch!==workspaceEpoch)return;
+  publicationStates.set(id,{...(result.data||{state:'draft',revision:0}),audit:audit.data||[],gatewayReady:probe?.status===404&&probe.headers.get('x-content-type-options')==='nosniff'});
  }catch{if(epoch===workspaceEpoch)publicationErrors.set(id,'Publishing is unavailable. Your draft remains private. Check the connection or backend setup.');}
  finally{publicationLoading.delete(id);if(epoch===workspaceEpoch&&location.hash==='#horse/'+saleHorse(db.listings.find(l=>l.id===id)||{})?.id)render()}
 }
@@ -78,6 +80,7 @@ function horseSalesExperience(id){
  normalizeSaleReferences();if(!publicationStates.has(l.id)&&!publicationLoading.has(l.id)&&!publicationErrors.has(l.id))queueMicrotask(()=>loadPublication(l.id));
  const s=l.sharing,p=publicationStates.get(l.id),media=saleMediaOptions(h,l);
  return top+`<div class="sale-state-row">${publicationBadge(l.id)}<span class="subtitle">Horse ID · ${esc(id)}</span><button class="link" onclick="loadPublication('${l.id}',true)">Refresh status</button></div>
+ ${p&&!p.gatewayReady?'<p class="sale-error" role="status">Buyer media is awaiting service activation. Draft saving and previews are available; publication is paused.</p>':''}
  ${publicationErrors.has(l.id)?`<p class="sale-error" role="alert">${esc(publicationErrors.get(l.id))}</p>`:''}
  ${p?.state==='published'?`<div class="publication-notice"><div><b>Your approved presentation is public</b><p class="subtitle">Draft edits stay private until you publish an update. Remove live access immediately with Unpublish.</p></div><a class="btn" href="#sale/${l.id}">View public page</a><button class="btn" onclick="confirmUnpublish('${l.id}')">Unpublish</button></div>`:''}
  <form id="connected-sale-form" onsubmit="saveConnectedDraft(event,'${l.id}')" onchange="readDraftForm(db.listings.find(l=>l.id==='${l.id}'));persist()"><div class="connected-sale-layout"><section><h2>Listing details</h2><p class="subtitle">Name, breed, age and sex use this horse’s current identity. These are included when you publish.</p><div class="identity-strip">${esc(h.name)} · ${esc(h.breed)} · ${esc(h.age)} years · ${esc(h.sex)}</div><div class="form-grid spaced">
@@ -93,7 +96,7 @@ function horseSalesExperience(id){
  <fieldset><legend>Observations</legend>${db.logs.filter(x=>x.horse===id).map(x=>selectedBox('logs',x.id,x.date+' · '+x.type,x.notes?.slice(0,160),s)).join('')||'<p class="subtitle">No observations recorded.</p>'}</fieldset>
  <fieldset><legend>Care records</legend>${db.tasks.filter(x=>x.horse===id).map(x=>selectedBox('tasks',x.id,x.title,x.date+' · '+(x.done?'Marked complete':'Planned'),s)).join('')||'<p class="subtitle">No care records recorded.</p>'}</fieldset>
  <p class="field-hint">No veterinary verification is available. Owner-entered records remain labelled as such.</p>
- <button class="btn primary" type="button" ${!p||publicationLoading.has(l.id)?'disabled':''} onclick="confirmPublish('${l.id}')">${p?.state==='published'?'Review & publish update':'Review & publish'}</button>
+ <button class="btn primary" type="button" ${!p?.gatewayReady||publicationLoading.has(l.id)?'disabled':''} onclick="confirmPublish('${l.id}')">${p?.state==='published'?'Review & publish update':'Review & publish'}</button>
  </aside></div></form>`;
 }
 function readDraftForm(l){
@@ -133,7 +136,7 @@ function previewConnectedDraft(id){const l=db.listings.find(x=>x.id===id);readDr
 async function confirmPublish(id){
  if(!await saveConnectedDraft(null,id))return;
  const l=db.listings.find(x=>x.id===id),h=saleHorse(l),p=publicationStates.get(id);
- if(!p)return toast('Refresh publication status before publishing.');
+ if(!p?.gatewayReady)return toast('Buyer media service is not ready. Refresh status after activation.');
  if(!l.city?.trim()||!l.country)return toast('Add the seller country and city first.');
  if(l.saleType==='Auction'&&(!l.closeDate||l.closeDate<todayLA()))return toast('Choose an auction closing date today or later.');
  const d=draftPresentation(l);openModal(p.state==='published'?'Publish updated presentation':'Publish this horse listing',buyerPresentation(d,true)+`<div class="publish-consent"><label class="confirm-identity"><input id="publish-consent" type="checkbox">I approve this presentation of ${esc(h.name)} and every selected record/media item for public access through a shareable link.</label><p class="field-hint">Unpublishing stops future access through Carrot. Copies already downloaded by buyers cannot be recalled. Public material is not veterinarian verified.</p><div class="form-actions"><button class="btn" onclick="closeModal()">Keep private draft</button><button class="btn primary" id="publish-listing" onclick="publishConnectedListing('${id}')">Confirm & publish</button></div><p id="publication-message" role="status"></p></div>`);hydrateVideos();hydrateCheckinPhotos();
@@ -183,3 +186,6 @@ listingDetail=function(id){
 };
 const originalDownloadSale=downloadSale;
 downloadSale=function(id){const l=db.listings.find(x=>x.id===id);if(!saleHorse(l))return toast('Link this draft to a horse before exporting a buyer presentation.');download(draftPresentation(l),'carrot-approved-sale-'+id+'.json')};
+
+window.addEventListener('pageshow',event=>{if(event.persisted&&location.hash.startsWith('#sale/'))render()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&location.hash.startsWith('#sale/'))render()});
