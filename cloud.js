@@ -28,6 +28,7 @@ function validateWorkspace(payload){
  return payload;
 }
 function clearWorkspaceMemory(){
+ if(typeof publicationStates!=='undefined'){publicationStates.clear();publicationErrors.clear();publicationLoading.clear();horseExperience={id:null,mode:'private'};publicSaleRequest++}
  workspaceEpoch++;clearTimeout(saveTimer);saveTimer=null;savePromise=null;saveGeneration=savedGeneration=0;syncBlocked=false;workspaceRevision=0;workspaceMedia={};db=emptyWorkspace();cartisProfile=null;
  document.querySelector('#modal')?.close();if(typeof stopHorseCamera==='function')stopHorseCamera();if(typeof checkinObjectUrls!=='undefined'){for(const url of checkinObjectUrls)URL.revokeObjectURL(url);checkinObjectUrls=[]}if(typeof mediaUrls!=='undefined'){for(const url of mediaUrls)URL.revokeObjectURL(url);mediaUrls=[]}
  if(typeof checkinDB!=='undefined')checkinDB=null;if(typeof videoDB!=='undefined')videoDB=null;
@@ -46,6 +47,7 @@ async function loadAccountWorkspace(user){
  // Keep the original sample asset layout compatible with previously uploaded workspaces.
  const prefix=portraitExamples.h1.includes('/')?'assets/':'';for(const record of [...db.horses,...db.events,...db.listings])if(/^(assets\/)?horse-(bay|pasture|portrait|sterling)\.jpg$/.test(record.img||''))record.img=prefix+record.img.split('/').pop();
  }
+ if(typeof normalizeSaleReferences==='function')normalizeSaleReferences();
  if(typeof discoveryCountry!=='undefined'){discoveryCountry=db.eventLocation?.country||cartisProfile?.country||'United States';discoveryCity=db.eventLocation?.city||'';discoveryType=db.eventLocation?.type||'All'}
  setSyncStatus('All changes saved');
 }
