@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+import vm from 'node:vm';
+import assert from 'node:assert/strict';
+const moduleURL=new URL('../dist/connected-sales.js',import.meta.url);const source=fs.readFileSync(fs.existsSync(moduleURL)?moduleURL:new URL('../connected-sales.js',import.meta.url),'utf8');
+const ctx=vm.createContext({profile:()=>'<div class="detail-hero">Private care</div>',prepareAuction(){},marketplace(){return ''},listingDetail(){return ''},downloadSale(){},db:{horses:[{id:'h1',name:'One horse',breed:'Test',age:8,sex:'Mare',sire:'Approved sire',medical:'PRIVATE_MEDICAL',passport:'PRIVATE_PASSPORT',portrait:'data:image/png;base64,aGVsbG8=',media:[{id:'p1',label:'Not selected',url:'data:image/png;base64,c2VjcmV0'}]}],listings:[{id:'l1',sourceHorseId:'h1',media:[],sharing:{fields:['sire'],media:['portrait'],logs:['log1','foreign'],tasks:[]}}],logs:[{id:'log1',horse:'h1',date:'2026-11-06',type:'Training',notes:'Selected observation',rider:'PRIVATE_RIDER'},{id:'foreign',horse:'h2',notes:'PRIVATE_FOREIGN'}],tasks:[]},uid:()=>crypto.randomUUID(),esc:v=>String(v??'').replaceAll('<','&lt;').replaceAll('"','&quot;'),tag:String,price:()=>'$0',mediaHtml:()=>'',CARTIS_CLOUD:{url:'https://example.supabase.co'},publicationStates:new Map()});
+vm.runInContext(source,ctx);
+const d=vm.runInContext('draftPresentation(db.listings[0])',ctx);
+assert.equal(d.name,'One horse');assert.equal(d.sire,'Approved sire');assert(!JSON.stringify(d).includes('PRIVATE_'));assert.equal(d.media.length,1);assert.equal(d.records.length,1);assert.equal(d.media[0].id,'portrait');
+ctx.db.listings[0].sharing={};const empty=vm.runInContext('draftPresentation(db.listings[0])',ctx);assert.equal(empty.media.length,0);assert.equal(empty.records.length,0);assert(!('sire' in empty));
+assert.match(vm.runInContext("profile('h1')",ctx),/Private care/);assert.match(vm.runInContext("profile('h1')",ctx),/aria-pressed="true"[^>]*[^]*?Private/);
+ctx.db.horses[0].media.push({label:'Legacy'});vm.runInContext('normalizeSaleReferences()',ctx);const stableId=ctx.db.horses[0].media[1].id;vm.runInContext('normalizeSaleReferences()',ctx);assert.equal(ctx.db.horses[0].media[1].id,stableId);
+assert(!source.includes('.createSignedUrl('));
+console.log('Passed: approved-only preview, other-horse log exclusion, empty sharing defaults, private default profile and stable legacy media IDs.');
