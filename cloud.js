@@ -23,7 +23,7 @@ async function cloudPanel(){
  }catch(error){cloudStatus(error.message||'Cloud access is unavailable.')}
 }
 async function cloudSignOut(){if(cloudBusy)return;const client=await cloudClient();const {error}=await client.auth.signOut();if(error)return cloudStatus(error.message);cloudOwner=null;cloudRevision=null;await cloudPanel()}
-function checkCloudPayload(payload){if(payload?.format!=='cartis-cloud-v1'||!payload.records||!['horses','tasks','logs','events'].every(key=>Array.isArray(payload.records[key]))||!Array.isArray(payload.media)||!payload.profile?.complete)throw Error('This cloud copy is not a valid Cartis workspace.');return payload}
+function checkCloudPayload(payload){if(payload?.format!=='cartis-cloud-v1'||!payload.records||!['horses','tasks','logs','events'].every(key=>Array.isArray(payload.records[key]))||!Array.isArray(payload.media)||!payload.profile?.complete)throw Error('This cloud copy is not a valid Carrot workspace.');return payload}
 async function readLocalMedia(database,store,key){return new Promise((resolve,reject)=>{const request=database.transaction(store).objectStore(store).get(key);request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
 function cloudMediaRefs(records){const refs=[];for(const log of records.logs||[])if(log.photoId)refs.push({kind:'photo',id:log.photoId});for(const listing of records.listings||[])for(const media of listing.media||[])if(media.blobId)refs.push({kind:'video',id:media.blobId});return [...new Map(refs.map(ref=>[ref.kind+'/'+ref.id,ref])).values()]}
 async function uploadCloudWorkspace(){
