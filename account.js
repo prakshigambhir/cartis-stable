@@ -4,6 +4,7 @@ function accountBrand(){return '<a class="brand account-brand" href="#login"><sp
 function authRedirect(){return new URL('./',location.href).href}
 function accountMessage(message,error=false){const el=$('#account-message');if(el){el.textContent=message;el.classList.toggle('error',error)}}
 function renderAccountRoute(){
+ if(typeof publicSaleRoute==='function'&&publicSaleRoute())return true;
  let route=location.hash.slice(1).split('/')[0]||'overview';
  if(!authReady||(!workspaceReady&&cartisSession)){
   document.body.classList.add('entry-mode');$('#app').innerHTML=`<section class="entry-layout">${accountBrand()}<div class="entry-card"><h1>${accountFailure?'We couldn’t open your stable':'Opening your stable…'}</h1><p class="subtitle" role="status">${esc(accountFailure||'Connecting securely to your account.')}</p>${accountFailure?'<button class="btn primary spaced" onclick="startCarrot()">Try again</button><button class="btn spaced" onclick="signOutDemo()">Sign out</button>':''}</div></section>`;return true;
