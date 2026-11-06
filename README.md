@@ -1,17 +1,11 @@
 # Carrot
 
-Horse care and stable web app.
+Horse care and stable management with Supabase account access and private database storage.
 
-This repository publishes the static web app directly from its root using GitHub Pages. In Settings → Pages choose **Deploy from a branch**, **main**, **/(root)**. No build is required.
+Sign-up uses email and password with email confirmation. Each user starts with an empty stable. Profiles, horses, care records, event plans and listings save automatically; check-in photos and videos use private media storage. Database policies restrict each workspace to its owner.
 
-For database setup, run `database-schema.sql` in your Supabase SQL Editor, then set only the public project URL and publishable key in `cloud-config.js`. See DEPLOYMENT.md for the email code template, data privacy and transfer limitations.
+Configure Supabase custom SMTP and the Site URL / redirect allowlist for your production domain before enabling public registration. Never put secret, service-role or SMTP keys in this repository. cloud-config.js contains public client settings only.
 
-No personal horse records or credentials are included. Supabase is connected with private workspace and media storage. Email-link verification is required for cloud transfers. Transfers are manual snapshots, not automatic sync.
+The interface is a responsive installable web app. Camera capture records a photo and owner-entered observation; it does not diagnose health or automatically identify animals. Auctions are workspace listing records, with no bidding or payments.
 
-The local demo sign-in is not secure authentication. Cloud access requires email verification. Camera capture records photos and owner-entered observations, without automatic identity or health analysis.
-
-Phone: open the Pages HTTPS URL and use Add to Home Screen (Safari) or Install app (Chrome).
-
-GitHub Pages cannot run the local Python news/calendar proxy. Selected catalogue entries and official organiser links remain available; live discovery needs a separately hosted API.
-
-Horse photos: Unsplash. Supabase SDK 2.119.0: MIT, see SUPABASE-LICENSE.
+Vercel publishes this static repository root. No build step is required.
