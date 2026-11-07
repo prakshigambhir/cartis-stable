@@ -4,7 +4,7 @@
 Buildless HTML/CSS/global JavaScript. `app.js` renders hash routes, `account.js` gates account routes, `cloud.js` persists a revision-checked workspace JSON to Supabase. Supabase Auth identifies the owner. `cartis_workspaces` has owner-only RLS; `cartis-private` stores owner-prefixed check-in photos and videos. Horse portraits/gallery photos are embedded in workspace JSON. `sales.js` has workspace-only listings, filters, media and exports; no public sales or bidding backend exists. `vision.js` captures still photos and manual observations only. Profile roles are descriptive: team collaboration and veterinarian authorization do not exist. No assessment, verified pedigree, veterinary verification, 3D, bidding or payment service exists.
 
 ## Reuse and exact modifications
-- `dist/app.js`: existing `#horse/:id` profile, `#listing/:id`, `#marketplace`; preserve private care/history/feed/media and add segmented experience navigation.
+- `dist/app.js` is reused unchanged: its `#horse/:id`, `#listing/:id` and `#marketplace` renderers are extended by `connected-sales.js`; private care/history/feed/media remain intact.
 - `dist/sales.js`: retain catalogue/media helpers; route linked listing creation into the horse's Sales experience; deprecate copying horse identity for new drafts.
 - `dist/connected-sales.js` (new): linked draft, explicit approvals, preview, publish/update/unpublish and owner audit UI; public `#sale/:id` with no sign-in requirement.
 - `dist/connected-sales.css` (new): compact brown segmented navigation, sharing checklist, buyer presentation, responsive states.
