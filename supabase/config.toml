@@ -1,2 +1,3 @@
+# Buyer media remains disabled by owner choice. Do not change without approval.
 [functions.listing-media]
-verify_jwt = false
+verify_jwt = true
