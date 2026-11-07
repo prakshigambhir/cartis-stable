@@ -90,14 +90,14 @@ function horseSalesExperience(id){
  </div><div class="sale-form-actions"><button class="btn primary" type="submit">Save private draft</button><button class="btn" type="button" onclick="previewConnectedDraft('${l.id}')">Preview buyer page</button></div><p id="sale-save-message" class="subtitle" role="status"></p>
  <div class="section-title section-gap"><h2>Photos & videos</h2></div><p class="subtitle">Media stays private until selected in the sharing checklist. Save draft changes before opening media tools.</p><a class="btn spaced" href="#listing/${l.id}">Manage listing media</a>
  ${p?.audit?.length?`<details class="publication-history"><summary>Publication history</summary>${p.audit.map(a=>`<p class="subtitle">${esc(a.action)} · revision ${a.revision} · ${esc(new Date(a.created_at).toLocaleString())}</p>`).join('')}</details>`:''}
- </section><aside class="sharing-panel"><h2>Choose what to share</h2><p class="subtitle">Everything below is private unless you select it. Whole selected text records will be visible; review them for personal details.</p>
+ </section><section class="sharing-panel"><h2>Choose what to share</h2><p class="subtitle">Everything below is private unless you select it. Whole selected text records will be visible; review them for personal details.</p>
  <fieldset><legend>Pedigree, history & health</legend>${sharingFields.map(([k,label])=>selectedBox('fields',k,label,h[k]?String(h[k]).slice(0,180):'Not recorded',s)).join('')}</fieldset>
  <fieldset><legend>Approved photos & videos</legend>${media.length?media.map(m=>selectedBox('media',m.id,m.label||'Horse media',m.kind==='video'?'Video':'Photo',s)).join(''):'<p class="subtitle">No media yet. Use the existing private photo or listing media tools.</p>'}</fieldset>
  <fieldset><legend>Observations</legend>${db.logs.filter(x=>x.horse===id).map(x=>selectedBox('logs',x.id,x.date+' · '+x.type,x.notes?.slice(0,160),s)).join('')||'<p class="subtitle">No observations recorded.</p>'}</fieldset>
  <fieldset><legend>Care records</legend>${db.tasks.filter(x=>x.horse===id).map(x=>selectedBox('tasks',x.id,x.title,x.date+' · '+(x.done?'Marked complete':'Planned'),s)).join('')||'<p class="subtitle">No care records recorded.</p>'}</fieldset>
  <p class="field-hint">No veterinary verification is available. Owner-entered records remain labelled as such.</p>
  <button class="btn primary" type="button" ${!p?.gatewayReady||publicationLoading.has(l.id)?'disabled':''} onclick="confirmPublish('${l.id}')">${p?.state==='published'?'Review & publish update':'Review & publish'}</button>
- </aside></div></form>`;
+ </section></div></form>`;
 }
 function readDraftForm(l){
  const form=$('#connected-sale-form');if(!form)return;
