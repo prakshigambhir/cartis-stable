@@ -32,9 +32,15 @@ select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-0000000000a1'
 do $$begin
  begin perform public.publish_carrot_listing('00000000-0000-4000-8000-000000000001',2,1); raise exception 'Stale workspace allowed'; exception when others then if sqlerrm<>'Workspace changed. Reload before publishing.' then raise; end if; end;
  begin perform public.publish_carrot_listing('00000000-0000-4000-8000-000000000001',1,0); raise exception 'Stale publication allowed'; exception when others then if sqlerrm<>'Publication changed. Reload its status before publishing.' then raise; end if; end;
- perform public.unpublish_carrot_listing('00000000-0000-4000-8000-000000000001',1);
+ -- Revoking individual approved material and publishing an update must replace the projection.
+ perform public.save_cartis_workspace(1,(select jsonb_set(payload,'{records,listings,0,sharing,media}','[]'::jsonb) from public.cartis_workspaces where user_id=auth.uid()));
+ perform public.publish_carrot_listing('00000000-0000-4000-8000-000000000001',2,1);
+ if exists(select 1 from public.carrot_sale_publications where assets<>'{}'::jsonb) then raise exception 'Removed media still shared after update'; end if;
+ if (public.get_carrot_listing('00000000-0000-4000-8000-000000000001')->'media')<>'[]'::jsonb then raise exception 'Removed media in public manifest'; end if;
+ if not exists(select 1 from public.cartis_workspaces where payload::text like '%SECRET_MEDICAL%') then raise exception 'Private source record changed'; end if;
+ perform public.unpublish_carrot_listing('00000000-0000-4000-8000-000000000001',2);
  if exists(select 1 from public.carrot_sale_publications where assets<>'{}'::jsonb or document<>'{}'::jsonb) then raise exception 'Revoked data retained in public projection'; end if;
- if (select count(*) from public.carrot_publication_audit)<>2 then raise exception 'Audit missing'; end if;
+ if (select count(*) from public.carrot_publication_audit)<>3 then raise exception 'Audit missing'; end if;
 end$$;
 set local role anon;
 select set_config('request.jwt.claim.sub','',true);
@@ -42,5 +48,5 @@ do $$begin
  if public.get_carrot_listing('00000000-0000-4000-8000-000000000001') is not null then raise exception 'Unpublished page still visible'; end if;
 end$$;
 reset role;
-select 'PASS: draft privacy, allowlisted records, media selection, anonymous restrictions, owner isolation, stale revisions, audit and unpublish revocation' as result;
+select 'PASS: draft privacy, allowlisted records, media selection, anonymous restrictions, owner isolation, stale revisions, individual media revocation, audit and unpublish revocation' as result;
 rollback;
