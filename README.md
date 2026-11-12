@@ -20,3 +20,12 @@ Backend migration: `database/migrations/20261106_connected_sales.sql` (additive;
 New public route: `#sale/<listing UUID>`; existing `#horse/<horse ID>`, `#listing/<listing UUID>` and `#marketplace` remain private. Sale drafts have no automatically selected private records. Legacy drafts are preserved and must be linked to an owned horse before publishing. No bidding, payments, AI diagnosis, veterinary verification, team collaboration or 3D/VR is introduced.
 
 Tests: `node tests/connected-sales.mjs`, `node tests/media-gateway.mjs`; run `tests/publication-privacy.sql` in a database test session (transaction rolls all fixtures back). Privacy SQL has been run successfully against the existing project. Existing account sync and camera lifecycle tests passed in the retained structured source. Design QA used isolated fictional local records, not user credentials. See `PHASE1_PLAN.md` for the inspected architecture and implementation decisions.
+
+
+## Interactive daily workspace
+
+The home and My horses routes now open a photo-led workspace. Select a horse to update care, edit health notes or feeding/training routines, and save journal entries in place. Task prompts and daily progress use actual care records; no automated health inference is introduced. Unfinished form text stays in memory while switching sections or horses in the current account and is cleared on account change. It is not a persistent offline draft.
+
+The existing camera workflow remains available, with a return link to the originating workspace. A new horse is selected immediately after creation. Sales publication restrictions remain unchanged; no inspection migrations or new medical/AI features were added.
+
+New files: workspace.js, workspace.css, tests/workspace.mjs. index.html and sw.js load/version the workspace assets. Run `node tests/workspace.mjs` for task selection, progress, journal linkage, duplicate submission, health field allowlist and account draft-isolation checks. Other existing account/camera/sales regression suites were retained and passed. Visual/interaction QA used isolated fictional local records, not real user credentials.
